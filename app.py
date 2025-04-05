@@ -86,6 +86,10 @@ if submitted:
     input_data = input_data[feature_order].astype(float)
     input_data = input_data[model.feature_name_]
 
+    st.write("Model expects:", model.feature_name_)
+st.write("Input data columns:", input_data.columns.tolist())
+
+
     prediction = model.predict(input_data)[0]
     prediction_proba = model.predict_proba(input_data)[0][1]
     percentage = round(prediction_proba * 100, 2)
