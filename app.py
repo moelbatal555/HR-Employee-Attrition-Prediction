@@ -84,6 +84,7 @@ if submitted:
         'Marital Status', 'Job Level', 'Company Size'
     ]
     input_data = input_data[feature_order].astype(float)
+    input_data = input_data[model.feature_name_]
 
     prediction = model.predict(input_data)[0]
     prediction_proba = model.predict_proba(input_data)[0][1]
