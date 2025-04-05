@@ -2,19 +2,17 @@ import streamlit as st
 import pandas as pd
 import joblib
 
-# Load the model
+st.set_page_config(page_title="HR Attrition Predictor", layout="centered")
+st.title("🔍 HR Employee Attrition Prediction")
+st.write("Enter employee details to predict the likelihood of attrition 🧑‍💼")
+
 @st.cache_resource
 def load_model():
     return joblib.load("final_model.pkl")
 
 model = load_model()
 
-# Page config
-st.set_page_config(page_title="HR Attrition Predictor", layout="centered")
-st.title("🔍 HR Employee Attrition Prediction")
-st.write("Enter employee details to predict the likelihood of attrition.")
-
-# Input form
+# Form to collect user input
 with st.form("prediction_form"):
     col1, col2 = st.columns(2)
 
@@ -56,45 +54,38 @@ if submitted:
         "Company Size": [company_size],
     })
 
+    # Encoding categorical variables
     encoding_maps = {
         "Gender": {"Male": 1, "Female": 0},
         "Job Role": {"Finance": 0, "Healthcare": 1, "Technology": 2, "Education": 3, "Media": 4},
-        "Work-Life Balance": {"Poor": 0, "Below Average": 1, "Good": 2, "Excellent": 3},
-        "Job Satisfaction": {"Very Low": 0, "Low": 1, "Medium": 2, "High": 3},
-        "Performance Rating": {"Low": 0, "Below Average": 1, "Average": 2, "High": 3},
-        "Education Level": {
-            "High School": 0,
-            "Associate Degree": 1,
-            "Bachelor’s Degree": 2,
-            "Master’s Degree": 3,
-            "PhD": 4
-        },
+        "Work-Life Balance": {"Poor": 1, "Below Average": 2, "Good": 3, "Excellent": 4},
+        "Job Satisfaction": {"Very Low": 1, "Low": 2, "Medium": 3, "High": 4},
+        "Performance Rating": {"Low": 1, "Below Average": 2, "Average": 3, "High": 4},
+        "Education Level": {"High School": 1, "Associate Degree": 2, "Bachelor’s Degree": 3, "Master’s Degree": 4, "PhD": 5},
         "Marital Status": {"Divorced": 0, "Married": 1, "Single": 2},
-        "Job Level": {"Entry": 0, "Mid": 1, "Senior": 2},
+        "Job Level": {"Entry": 1, "Mid": 2, "Senior": 3},
         "Company Size": {"Small": 0, "Medium": 1, "Large": 2},
     }
 
     for col, mapping in encoding_maps.items():
         input_data[col] = input_data[col].map(mapping)
 
-    feature_order = [
-        'Age', 'Gender', 'Years at Company', 'Monthly Income', 'Job Role',
-        'Work-Life Balance', 'Job Satisfaction', 'Performance Rating',
-        'Number of Promotions', 'Distance from Home', 'Education Level',
-        'Marital Status', 'Job Level', 'Company Size'
-    ]
-    input_data = input_data[feature_order].astype(float)
-    input_data = input_data[model.feature_name_]
-
+    # 🧪 Debugging output
+    st.subheader("Debug Info:")
     st.write("Model expects:", model.feature_name_)
-st.write("Input data columns:", input_data.columns.tolist())
+    st.write("Input data columns:", input_data.columns.tolist())
 
+    # Match model columns
+    try:
+        input_data = input_data[model.feature_name_]
 
-    prediction = model.predict(input_data)[0]
-    prediction_proba = model.predict_proba(input_data)[0][1]
-    percentage = round(prediction_proba * 100, 2)
+        prediction = model.predict(input_data)[0]
+        prediction_proba = model.predict_proba(input_data)[0][1]
+        percentage = round(prediction_proba * 100, 2)
 
-    if prediction == 1:
-        st.warning(f"⚠️ The employee is likely to leave. Probability: {percentage}%")
-    else:
-        st.success(f"✅ The employee is unlikely to leave. Probability: {percentage}%")
+        if prediction == 1:
+            st.warning(f"⚠️ The employee is likely to leave the company. Probability: {percentage}%")
+        else:
+            st.success(f"✅ The employee is unlikely to leave. Probability: {percentage}%")
+    except Exception as e:
+        st.error(f"❌ Prediction error: {str(e)}")
