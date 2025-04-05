@@ -4,7 +4,7 @@ import numpy as np
 import joblib
 
 # Load the model
-model = joblib.load("final_model_joblib.pkl")
+model = joblib.load("final_model.pkl")
 
 st.set_page_config(page_title="Employee Attrition Predictor", layout="wide")
 st.title("HR Employee Attrition Prediction Dashboard")
