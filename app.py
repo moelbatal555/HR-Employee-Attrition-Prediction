@@ -5,7 +5,8 @@ import pickle
 
 # Load model
 with open("final_model.pkl", "rb") as file:
-    model = pickle.load(file)
+import joblib
+model = joblib.load("final_model.pkl")
 
 st.title("HR Employee Attrition Prediction")
 
