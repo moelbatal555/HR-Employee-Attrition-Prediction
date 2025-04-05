@@ -61,7 +61,6 @@ if model is not None:
             "Company Size": [company_size],
         })
 
-        # Make prediction and get probability
         try:
             prediction = model.predict(input_data)[0]
             prediction_proba = model.predict_proba(input_data)[0][1]  # Probability of attrition
