@@ -1,91 +1,92 @@
 import streamlit as st
 import pandas as pd
 import joblib
+import numpy as np
 
-st.set_page_config(page_title="HR Attrition Predictor", layout="centered")
-st.title("🔍 HR Employee Attrition Prediction")
-st.write("Enter employee details to predict the likelihood of attrition 🧑‍💼")
-
+# Load model
 @st.cache_resource
 def load_model():
     return joblib.load("final_model.pkl")
 
 model = load_model()
 
-# Form to collect user input
-with st.form("prediction_form"):
-    col1, col2 = st.columns(2)
+st.set_page_config(page_title="HR Attrition Predictor", layout="centered")
+st.title("HR Employee Attrition Prediction")
 
-    with col1:
-        age = st.number_input("Age", min_value=18, max_value=65, value=30)
-        gender = st.selectbox("Gender", ["Male", "Female"])
-        years_at_company = st.number_input("Years at Company", min_value=0, max_value=40, value=5)
-        monthly_income = st.number_input("Monthly Income", min_value=1000, value=5000)
-        job_role = st.selectbox("Job Role", ["Finance", "Healthcare", "Technology", "Education", "Media"])
-        work_life_balance = st.selectbox("Work-Life Balance", ["Poor", "Below Average", "Good", "Excellent"])
-        job_satisfaction = st.selectbox("Job Satisfaction", ["Very Low", "Low", "Medium", "High"])
+st.markdown("---")
 
-    with col2:
-        performance_rating = st.selectbox("Performance Rating", ["Low", "Below Average", "Average", "High"])
-        num_promotions = st.number_input("Number of Promotions", min_value=0, max_value=10, value=1)
-        distance_from_home = st.number_input("Distance from Home (miles)", min_value=0, value=10)
-        education_level = st.selectbox("Education Level", ["High School", "Associate Degree", "Bachelor’s Degree", "Master’s Degree", "PhD"])
-        marital_status = st.selectbox("Marital Status", ["Divorced", "Married", "Single"])
-        job_level = st.selectbox("Job Level", ["Entry", "Mid", "Senior"])
-        company_size = st.selectbox("Company Size", ["Small", "Medium", "Large"])
+# Input form
+with st.form("input_form"):
+    st.subheader("Enter Employee Information")
+    age = st.slider("Age", 18, 65, 30)
+    gender = st.selectbox("Gender", ["Male", "Female"])
+    years_at_company = st.slider("Years at Company", 0, 40, 5)
+    monthly_income = st.number_input("Monthly Income", 1000, 100000, 5000)
+    job_role = st.selectbox("Job Role", [
+        "Sales Executive", "Research Scientist", "Laboratory Technician", "Manufacturing Director",
+        "Healthcare Representative", "Manager", "Sales Representative", "Research Director", "Human Resources"])
+    work_life_balance = st.slider("Work-Life Balance", 1, 4, 3)
+    job_satisfaction = st.slider("Job Satisfaction", 1, 4, 3)
+    performance_rating = st.slider("Performance Rating", 1, 4, 3)
+    num_promotions = st.slider("Number of Promotions", 0, 10, 1)
+    distance_from_home = st.slider("Distance from Home (km)", 1, 50, 10)
+    education_level = st.slider("Education Level", 1, 5, 3)
+    marital_status = st.selectbox("Marital Status", ["Single", "Married", "Divorced"])
+    num_dependents = st.slider("Number of Dependents", 0, 10, 1)
+    job_level = st.slider("Job Level", 1, 5, 2)
+    company_size = st.slider("Company Size (No. of Employees in 1000s)", 1, 100, 10)
+    company_tenure = st.slider("Company Tenure (Years)", 0, 40, 5)
+    remote_work = st.selectbox("Remote Work", ["Yes", "No"])
+    leadership_opportunities = st.selectbox("Leadership Opportunities", ["Yes", "No"])
+    innovation_opportunities = st.selectbox("Innovation Opportunities", ["Yes", "No"])
+    company_reputation = st.slider("Company Reputation (1-5)", 1, 5, 3)
+    employee_recognition = st.selectbox("Employee Recognition", ["Yes", "No"])
 
-    submitted = st.form_submit_button("🔎 Predict")
+    submitted = st.form_submit_button("Predict")
 
 if submitted:
-    input_data = pd.DataFrame.from_dict({
-        "Age": [age],
-        "Gender": [gender],
-        "Years at Company": [years_at_company],
-        "Monthly Income": [monthly_income],
-        "Job Role": [job_role],
-        "Work-Life Balance": [work_life_balance],
-        "Job Satisfaction": [job_satisfaction],
-        "Performance Rating": [performance_rating],
-        "Number of Promotions": [num_promotions],
-        "Distance from Home": [distance_from_home],
-        "Education Level": [education_level],
-        "Marital Status": [marital_status],
-        "Job Level": [job_level],
-        "Company Size": [company_size],
-    })
-
-    # Encoding categorical variables
-    encoding_maps = {
-        "Gender": {"Male": 1, "Female": 0},
-        "Job Role": {"Finance": 0, "Healthcare": 1, "Technology": 2, "Education": 3, "Media": 4},
-        "Work-Life Balance": {"Poor": 1, "Below Average": 2, "Good": 3, "Excellent": 4},
-        "Job Satisfaction": {"Very Low": 1, "Low": 2, "Medium": 3, "High": 4},
-        "Performance Rating": {"Low": 1, "Below Average": 2, "Average": 3, "High": 4},
-        "Education Level": {"High School": 1, "Associate Degree": 2, "Bachelor’s Degree": 3, "Master’s Degree": 4, "PhD": 5},
-        "Marital Status": {"Divorced": 0, "Married": 1, "Single": 2},
-        "Job Level": {"Entry": 1, "Mid": 2, "Senior": 3},
-        "Company Size": {"Small": 0, "Medium": 1, "Large": 2},
+    # Raw input data
+    input_dict = {
+        "Age": age,
+        "Gender": 1 if gender == "Male" else 0,
+        "Years_at_Company": years_at_company,
+        "Monthly_Income": monthly_income,
+        "Job_Role": hash(job_role) % 1000,  # Simplified encoding
+        "Work-Life_Balance": work_life_balance,
+        "Job_Satisfaction": job_satisfaction,
+        "Performance_Rating": performance_rating,
+        "Number_of_Promotions": num_promotions,
+        "Distance_from_Home": distance_from_home,
+        "Education_Level": education_level,
+        "Marital_Status": hash(marital_status) % 1000,
+        "Number_of_Dependents": num_dependents,
+        "Job_Level": job_level,
+        "Company_Size": company_size,
+        "Company_Tenure": company_tenure,
+        "Remote_Work": 1 if remote_work == "Yes" else 0,
+        "Leadership_Opportunities": 1 if leadership_opportunities == "Yes" else 0,
+        "Innovation_Opportunities": 1 if innovation_opportunities == "Yes" else 0,
+        "Company_Reputation": company_reputation,
+        "Employee_Recognition": 1 if employee_recognition == "Yes" else 0,
     }
 
-    for col, mapping in encoding_maps.items():
-        input_data[col] = input_data[col].map(mapping)
+    # Engineered features
+    input_dict["Salary_Performance_Ratio"] = monthly_income / (performance_rating + 1e-5)
+    input_dict["Tenure_Group"] = 1 if years_at_company < 3 else (2 if years_at_company < 10 else 3)
+    input_dict["WorkLife_Satisfaction_Score"] = (work_life_balance + job_satisfaction) / 2
+    input_dict["Income_JobLevel_Ratio"] = monthly_income / (job_level + 1e-5)
+    input_dict["Attrition_Num"] = 0  # dummy value just for model structure
 
-    # 🧪 Debugging output
-    st.subheader("Debug Info:")
-    st.write("Model expects:", model.feature_name_)
-    st.write("Input data columns:", input_data.columns.tolist())
+    input_df = pd.DataFrame([input_dict])
 
-    # Match model columns
-    try:
-        input_data = input_data[model.feature_name_]
+    # Reorder columns to match model input
+    input_df = input_df[model.feature_name_]
 
-        prediction = model.predict(input_data)[0]
-        prediction_proba = model.predict_proba(input_data)[0][1]
-        percentage = round(prediction_proba * 100, 2)
+    prediction = model.predict(input_df)[0]
+    prediction_proba = model.predict_proba(input_df)[0][1]
+    percentage = round(prediction_proba * 100, 2)
 
-        if prediction == 1:
-            st.warning(f"⚠️ The employee is likely to leave the company. Probability: {percentage}%")
-        else:
-            st.success(f"✅ The employee is unlikely to leave. Probability: {percentage}%")
-    except Exception as e:
-        st.error(f"❌ Prediction error: {str(e)}")
+    st.markdown("---")
+    st.subheader("Prediction Result")
+    st.write(f"**Attrition Likelihood:** {percentage}%")
+    st.write(f"**Prediction:** {'Will Leave' if prediction == 1 else 'Will Stay'}")
