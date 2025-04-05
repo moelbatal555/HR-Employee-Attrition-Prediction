@@ -52,24 +52,33 @@ if submitted:
         "Job Level": [job_level],
         "Company Size": [company_size],
     })
-     encoding_maps = {
-            "Gender": {"Male": 1, "Female": 0},
-            "Job Role": {"Finance": 0, "Healthcare": 1, "Technology": 2, "Education": 3, "Media": 4},
-            "Work-Life Balance": {"Poor": 0, "Below Average": 1, "Good": 2, "Excellent": 3},
-            "Job Satisfaction": {"Very Low": 0, "Low": 1, "Medium": 2, "High": 3},
-            "Performance Rating": {"Low": 0, "Below Average": 1, "Average": 2, "High": 3},
-            "Education Level": {"High School": 0, "Associate Degree": 1, "Bachelor’s Degree": 2, "Master’s Degree": 3, "PhD": 4},
-            "Marital Status": {"Divorced": 0, "Married": 1, "Single": 2},
-            "Job Level": {"Entry": 0, "Mid": 1, "Senior": 2},
-            "Company Size": {"Small": 0, "Medium": 1, "Large": 2},
-        }
 
-        for col, mapping in encoding_maps.items():
-            input_data[col] = input_data[col].map(mapping)
+    # 🔁 Encoding for categorical features
+    encoding_maps = {
+        "Gender": {"Male": 1, "Female": 0},
+        "Job Role": {"Finance": 0, "Healthcare": 1, "Technology": 2, "Education": 3, "Media": 4},
+        "Work-Life Balance": {"Poor": 0, "Below Average": 1, "Good": 2, "Excellent": 3},
+        "Job Satisfaction": {"Very Low": 0, "Low": 1, "Medium": 2, "High": 3},
+        "Performance Rating": {"Low": 0, "Below Average": 1, "Average": 2, "High": 3},
+        "Education Level": {"High School": 0, "Associate Degree": 1, "Bachelor’s Degree": 2, "Master’s Degree": 3, "PhD": 4},
+        "Marital Status": {"Divorced": 0, "Married": 1, "Single": 2},
+        "Job Level": {"Entry": 0, "Mid": 1, "Senior": 2},
+        "Company Size": {"Small": 0, "Medium": 1, "Large": 2},
+    }
 
+    for col, mapping in encoding_maps.items():
+        input_data[col] = input_data[col].map(mapping)
+
+    # ✅ Prediction
     prediction = model.predict(input_data)[0]
     prediction_proba = model.predict_proba(input_data)[0][1]
     percentage = round(prediction_proba * 100, 2)
+
+    if prediction == 1:
+        st.warning(f"⚠️ The employee is likely to leave the company. Probability: {percentage}%")
+    else:
+        st.success(f"✅ The employee is unlikely to leave. Probability: {percentage}%")
+
 
     if prediction == 1:
         st.warning(f"⚠️ The employee is likely to leave the company. Probability: {percentage}%")
