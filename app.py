@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import joblib
 
-# Load the trained model
 @st.cache_resource
 def load_model():
     return joblib.load("final_model.pkl")
@@ -13,7 +12,6 @@ st.set_page_config(page_title="HR Attrition Predictor", layout="centered")
 st.title("🔍 HR Employee Attrition Prediction")
 st.write("Enter employee details to predict the likelihood of attrition 🧑‍💼")
 
-# Form to collect user input
 with st.form("prediction_form"):
     col1, col2 = st.columns(2)
 
@@ -55,14 +53,11 @@ if submitted:
         "Company Size": [company_size],
     })
 
-    try:
-        prediction = model.predict(input_data)[0]
-        prediction_proba = model.predict_proba(input_data)[0][1]
-        percentage = round(prediction_proba * 100, 2)
+    prediction = model.predict(input_data)[0]
+    prediction_proba = model.predict_proba(input_data)[0][1]
+    percentage = round(prediction_proba * 100, 2)
 
-        if prediction == 1:
-            st.warning(f"⚠️ The employee is likely to leave the company. Probability: {percentage}%")
-        else:
-            st.success(f"✅ The employee is unlikely to leave. Probability: {percentage}%")
-    except Exception as e:
-        st.error(f"🚨 An error occurred while predicting. Make sure the model supports this input format.\n\nDetails: {str(e)}")
+    if prediction == 1:
+        st.warning(f"⚠️ The employee is likely to leave the company. Probability: {percentage}%")
+    else:
+        st.success(f"✅ The employee is unlikely to leave. Probability: {percentage}%")
